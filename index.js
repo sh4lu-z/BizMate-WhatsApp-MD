@@ -5,6 +5,7 @@ const {
     fetchLatestBaileysVersion,
     downloadContentFromMessage
 } = require('@whiskeysockets/baileys');
+
 const pino = require('pino');
 const mongoose = require('mongoose'); 
 const fs = require('fs');
@@ -233,9 +234,7 @@ async function startBot() {
     }
 });
 
-    // ============================================================
     // 📩 MESSAGE HANDLER (FIXED)
-    // ============================================================
     const saveSettings = async () => {
         try {
             await GlobalData.findByIdAndUpdate("bot_master_data", { settings: SETTINGS }, { upsert: true });
@@ -257,9 +256,7 @@ async function startBot() {
             msg.message = msg.message.ephemeralMessage.message;
         }
 
-        // ============================================================
         // 🟢 1. AUTO STATUS VIEW & REACT
-        // ============================================================
         if (msg.key.remoteJid === 'status@broadcast') {
             if (SETTINGS.autostatus) {
                 // Human වගේ පේන්න තත්පර 2ක් ඉන්නවා
@@ -311,9 +308,7 @@ async function startBot() {
         }
         if (msg.key.fromMe) return;
 
-        // ============================================================
         // 🎛️ OWNER PANEL (#cmd) - SWITCHES
-        // ============================================================
             if (text.startsWith('#cmd')) {
                 const parts = text.trim().split(/\s+/);
                 const isOwner = senderNum === CONFIG.OWNER_PHONE || senderNum === CONFIG.OWNER_NUMBER;
@@ -325,15 +320,15 @@ async function startBot() {
 
                     if (!cmd) {
                         return await sock.sendMessage(from, { text: `
-🎛️ *CONTROL PANEL*
-------------------
-(#cmd <option> <on/off>)
+                    🎛️ *CONTROL PANEL*
+                    ------------------
+                    (#cmd <option> <on/off>)
 
-🔹 system : ${SETTINGS.system ? '✅' : '🔴'}
-🔹 mode : ${SETTINGS.public_mode ? '🌍' : '🔒'}
-🔹 anticall : ${SETTINGS.anticall ? '✅' : '🔴'}
-🔹 autostatus : ${SETTINGS.autostatus ? '✅' : '🔴'}
-🔹 react : ${SETTINGS.autoreact ? '✅' : '🔴'}
+                   🔹 system : ${SETTINGS.system ? '✅' : '🔴'}
+                   🔹 mode : ${SETTINGS.public_mode ? '🌍' : '🔒'}
+                   🔹 anticall : ${SETTINGS.anticall ? '✅' : '🔴'}
+                   🔹 autostatus : ${SETTINGS.autostatus ? '✅' : '🔴'}
+                   🔹 react : ${SETTINGS.autoreact ? '✅' : '🔴'}
                         ` });
                     }
 
@@ -432,7 +427,7 @@ if (productSession[senderNum]) {
         session.data.desc = userText;
 
         // ⏳ 1. User ට කියනවා AI එක වැඩ පටන් ගත්තා කියලා
-        await sock.sendMessage(from, { text: "🤖 විස්තරේ හරි! AI එකෙන් Keywords Generate කරනකම් පොඩ්ඩක් ඉන්න..." });
+        //await sock.sendMessage(from, { text: "🤖 විස්තරේ හරි! AI එකෙන් Keywords Generate කරනකම් පොඩ්ඩක් ඉන්න..." });
 
         // 🧠 2. AI එකෙන් Keywords ජෙනරේට් කරගන්නවා
         const aiKeywords = await generateSmartKeywords(
