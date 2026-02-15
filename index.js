@@ -23,9 +23,7 @@ const { CONFIG, SETTINGS } = require('./config');
 const { getMachanResponse } = require('./ai_logic');
 
 
-// ============================================
 // 📦 BUSINESS PRODUCT SCHEMA (UPDATED)
-// ============================================
 const productSchema = new mongoose.Schema({
     category: { type: String, index: true },
     name: String,
@@ -87,9 +85,7 @@ async function uploadToCloud(buffer, type) {
     }
 }
 
-// ============================================
 // 🧠 AI KEYWORD GENERATOR (GROQ - LLAMA 3)
-// ============================================
 async function generateSmartKeywords(name, category, desc) {
     try {
         // 🔥 PROMPT UPDATE: REMOVE GENERIC WORDS (PRICE, SALE, ETC.)
@@ -134,18 +130,16 @@ async function generateSmartKeywords(name, category, desc) {
     }
 }
 
-// ============================================================
 // 🚀 MAIN BOT FUNCTION
-// ============================================================
 async function startBot() {
     console.log("🚀 Bot Starting...");
 
-    // 🔴 FIX: පරණ Listeners අයින් කිරීම (මේක අලුත් Socket එක හදන්න කලින් කරන්න ඕනේ)
+ 
     if (sock) {
         sock.ev.removeAllListeners('messages.upsert');
         sock.ev.removeAllListeners('connection.update');
         sock.ev.removeAllListeners('creds.update');
-        sock.ev.removeAllListeners('call'); // Anti-call listener එකත් අයින් කරන්න ඕනේ
+        sock.ev.removeAllListeners('call'); 
     }
 
     // 1. Connect MongoDB
@@ -186,10 +180,8 @@ async function startBot() {
         keepAliveIntervalMs: 10000,    // Disconnect නොවී තියාගනී
         retryRequestDelayMs: 5000      // Error ආවොත් හිමින් ට්‍රයි කරයි
     });
-
-    // ============================================================
-    // 🔢 PAIRING CODE LOGIC (මෙන්න ඔයා ඉල්ලපු කෑල්ල)
-    // ============================================================
+    
+    // 🔢 PAIRING CODE LOGIC 
     if (!sock.authState.creds.registered) {
         const phoneNumber = CONFIG.PAIRING_NUMBER;
         if (!phoneNumber || phoneNumber === "947XXXXXXXX") {
@@ -210,9 +202,7 @@ async function startBot() {
         }
     }
 
-    // ============================================================
     // 📞 ANTI-CALL SYSTEM
-    // ============================================================
     sock.ev.on('call', async (node) => {
         if (!SETTINGS.anticall) return;
         const { id, from, status } = node[0];
@@ -235,7 +225,7 @@ async function startBot() {
         console.log(`Connection closed. Status: ${statusCode}. Reconnecting: ${shouldReconnect}`);
         
         if (shouldReconnect) {
-            // තත්පර 5ක් ඉඳලා එක පාරක් විතරක් Restart කරන්න
+
             setTimeout(() => startBot(), 5000);
         }
     } else if (connection === 'open') {
@@ -262,13 +252,13 @@ async function startBot() {
         let msg = messages[0];
         if (!msg.message) return;
 
-        // 🛠️ FIX: Disappearing Messages (Ephemeral)
+        // 🛠️ FIX: Disappearing Messages 
         if (msg.message.ephemeralMessage) {
             msg.message = msg.message.ephemeralMessage.message;
         }
 
         // ============================================================
-        // 🟢 1. AUTO STATUS VIEW & REACT (Status ආවොත් මෙතනින් ඉවරයි)
+        // 🟢 1. AUTO STATUS VIEW & REACT
         // ============================================================
         if (msg.key.remoteJid === 'status@broadcast') {
             if (SETTINGS.autostatus) {
@@ -290,11 +280,7 @@ async function startBot() {
             return; 
         }
 
-        // ============================================================
-        // 🕵️‍♂️ REAL NUMBER EXTRACTOR (SAFE - NO KEY MODIFICATION)
-        // ============================================================
-        
-      
+        // 🕵️‍♂️ REAL NUMBER EXTRACTOR 
         const from = msg.key.remoteJid;
         
   
@@ -302,9 +288,8 @@ async function startBot() {
                        ((msg.key.participant || from).includes('@g.us') ? '@g.us' : '@s.whatsapp.net');
         let realNumber = msg.key.participantAlt || msg.key.remoteJidAlt || rawSender;
         const senderNum = realNumber.split('@')[0].split(':')[0];
-        // ============================================================
-        // 🛑 LOOP PROTECTION (බොට් තමන්ටම reply කරගැනීම වැළැක්වීම)
-        // ============================================================
+        
+        // 🛑 LOOP PROTECTION 
         if (msg.key.fromMe) return; 
 
         // Message Type & Text ගැනීම
@@ -316,7 +301,7 @@ async function startBot() {
         const isGroup = from.endsWith('@g.us');
         if (isGroup || from.includes('@newsletter')) return;
 
-        // 2. AUTO REACT (මෙතන msg.key එක original එකම පාවිච්චි වෙනවා)
+        // 2. AUTO REACT 
         if (SETTINGS.autoreact && !text.startsWith('#')) {
              try {
                  await sock.sendMessage(from, { react: { text: SETTINGS.auto_emoji, key: msg.key } });
@@ -409,7 +394,7 @@ if (isMedia && caption.startsWith('#add')) {
                         addedBy: senderNum
                     }
                 };
-                return await sock.sendMessage(from, { text: "✅ *Upload Done!*\n\nදැන් මේකේ **Category** එක එවන්න.\n(උදා: bottle, phone, shoe)" });
+                return await sock.sendMessage(from, { text: "✅ *Upload Done!*\n\nදැන් මේකේ *Category* එක එවන්න.\n(උදා: bottle, phone, shoe)" });
             } else {
                 return await sock.sendMessage(from, { text: "❌ Upload Fail වුනා මචන්." });
             }
@@ -428,19 +413,19 @@ if (productSession[senderNum]) {
     if (session.step === 'ASK_CATEGORY') {
         session.data.category = userText.toLowerCase();
         session.step = 'ASK_NAME';
-        return await sock.sendMessage(from, { text: "එළ! 📦 දැන් මේ අයිටම් එකේ **නම (Name)** මොකක්ද?" });
+        return await sock.sendMessage(from, { text: "එළ! 📦 දැන් මේ අයිටම් එකේ *නම (Name)* මොකක්ද?" });
     }
 
     if (session.step === 'ASK_NAME') {
         session.data.name = userText;
         session.step = 'ASK_PRICE';
-        return await sock.sendMessage(from, { text: "හරි, 💰 මේකේ **මිල (Price)** කීයද?" });
+        return await sock.sendMessage(from, { text: "හරි, 💰 මේකේ *මිල (Price)* කීයද?" });
     }
 
     if (session.step === 'ASK_PRICE') {
         session.data.price = userText;
         session.step = 'ASK_DESC';
-        return await sock.sendMessage(from, { text: "අන්තිම එක! 📝 මේක ගැන පොඩි **විස්තරයක් (Description)** එවන්න." });
+        return await sock.sendMessage(from, { text: "අන්තිම එක! 📝 මේක ගැන පොඩි *විස්තරයක් (Description)* එවන්න." });
     }
 
     if (session.step === 'ASK_DESC') {
@@ -484,10 +469,9 @@ if (productSession[senderNum]) {
         });
     }
 }   
-            // ============================================================
+
             // 🤖 AI LOGIC (IF NOT #)
-            // ============================================================
-            if (text.startsWith('#')) return; // # ගැහුවොත් AI එකට යන්නේ නෑ
+            if (text.startsWith('#')) return; 
 
             // System Off නම් හෝ Private Mode එකේදී පිට අයට වැඩ නෑ
             const isOwner = senderNum === CONFIG.OWNER_PHONE || senderNum === CONFIG.OWNER_NUMBER;
