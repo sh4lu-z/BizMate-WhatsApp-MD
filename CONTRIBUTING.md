@@ -29,7 +29,7 @@ Fork the repository to your own GitHub account and clone it locally:
 ```bash
 git clone [https://github.com/YOUR_USERNAME/BizMate-WhatsApp-MD.git](https://github.com/YOUR_USERNAME/BizMate-WhatsApp-MD.git)
 ```
-Create a Branch
+##Create a Branch
 Always create a new branch for your work. Don't work on the main branch.
 ```bash
 git checkout -b feature/YourFeatureName
@@ -50,7 +50,7 @@ git push origin your-branch-name
 
 Commit and Push
 
-Open a Pull Request (PR)
+##Open a Pull Request (PR)
 
 Go to the original BizMate repository and you will see a "Compare & pull request" button.
 
@@ -58,14 +58,14 @@ Provide a clear title and description of your changes.
 
 Link the PR to the relevant Issue (e.g., "Fixes #12").
 
-Code of Conduct
+##Code of Conduct
 Be respectful to other contributors.
 
 Provide constructive feedback.
 
 Help beginners—we were all beginners once!
 
-💬 Need Help?
+##💬 Need Help?
 If you have questions or get stuck, feel free to open an issue with the label question or contact the maintainers.
 
 Happy Coding! Let's make BizMate the best AI Business Assistant! 🌟
