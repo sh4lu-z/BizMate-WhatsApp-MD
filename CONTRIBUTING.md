@@ -72,7 +72,7 @@ Link the PR to the relevant Issue (e.g., "Fixes #12").
 
 ---
 
-##Code of Conduct
+### Code of Conduct
 Be respectful to other contributors.
 
 Provide constructive feedback.
@@ -81,7 +81,7 @@ Help beginners—we were all beginners once!
 
 ---
 
-###💬 Need Help?
+## 💬 Need Help?
 
 If you have questions or get stuck, feel free to open an issue with the label question or contact the maintainers.
 
