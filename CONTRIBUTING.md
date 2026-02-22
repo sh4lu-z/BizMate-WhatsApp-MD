@@ -24,12 +24,15 @@ Follow these steps to ensure your contribution gets merged quickly:
 ### 1. Find an Issue or Create One
 Before you start coding, check the [Issues](https://github.com/sh4lu-z/BizMate-WhatsApp-MD/issues) tab. If you find something you want to work on, leave a comment. If it's a new idea, open a new issue first.
 
+---
 
 ### 2. Fork and Clone
 Fork the repository to your own GitHub account and clone it locally:
 ```bash
 git clone [https://github.com/YOUR_USERNAME/BizMate-WhatsApp-MD.git](https://github.com/YOUR_USERNAME/BizMate-WhatsApp-MD.git)
 ```
+---
+
 ### 3. Create a Branch
 Always create a new branch for your work. Don't work on the main branch.
 ```bash
@@ -37,6 +40,8 @@ git checkout -b feature/YourFeatureName
 # OR
 git checkout -b fix/YourBugFixName
 ```
+---
+
 ### 4. Make Your Changes
 Write clean, readable code.
 
@@ -47,7 +52,7 @@ Test your changes thoroughly!
 git add .
 git commit -m "Brief description of what you did"
 git push origin your-branch-name
-
+---
 
 ### 5. Commit and Push
 ```bash
@@ -55,6 +60,7 @@ git add .
 git commit -m "Brief description of what you did"
 git push origin your-branch-name
 ```
+---
 
 ### 6. Open a Pull Request (PR)
 
@@ -64,12 +70,16 @@ Provide a clear title and description of your changes.
 
 Link the PR to the relevant Issue (e.g., "Fixes #12").
 
+---
+
 ##Code of Conduct
 Be respectful to other contributors.
 
 Provide constructive feedback.
 
 Help beginners—we were all beginners once!
+
+---
 
 ###💬 Need Help?
 
