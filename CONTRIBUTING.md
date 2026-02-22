@@ -24,19 +24,20 @@ Follow these steps to ensure your contribution gets merged quickly:
 ### 1. Find an Issue or Create One
 Before you start coding, check the [Issues](https://github.com/sh4lu-z/BizMate-WhatsApp-MD/issues) tab. If you find something you want to work on, leave a comment. If it's a new idea, open a new issue first.
 
+
 ### 2. Fork and Clone
 Fork the repository to your own GitHub account and clone it locally:
 ```bash
 git clone [https://github.com/YOUR_USERNAME/BizMate-WhatsApp-MD.git](https://github.com/YOUR_USERNAME/BizMate-WhatsApp-MD.git)
 ```
-##Create a Branch
+### 3. Create a Branch
 Always create a new branch for your work. Don't work on the main branch.
 ```bash
 git checkout -b feature/YourFeatureName
 # OR
 git checkout -b fix/YourBugFixName
 ```
-Make Your Changes
+### 4. Make Your Changes
 Write clean, readable code.
 
 Follow the existing coding style of the project.
@@ -48,9 +49,14 @@ git commit -m "Brief description of what you did"
 git push origin your-branch-name
 
 
-Commit and Push
+### 5. Commit and Push
+```bash
+git add .
+git commit -m "Brief description of what you did"
+git push origin your-branch-name
+```
 
-##Open a Pull Request (PR)
+### 6. Open a Pull Request (PR)
 
 Go to the original BizMate repository and you will see a "Compare & pull request" button.
 
@@ -65,7 +71,8 @@ Provide constructive feedback.
 
 Help beginners—we were all beginners once!
 
-##💬 Need Help?
+###💬 Need Help?
+
 If you have questions or get stuck, feel free to open an issue with the label question or contact the maintainers.
 
 Happy Coding! Let's make BizMate the best AI Business Assistant! 🌟
