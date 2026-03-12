@@ -1,5 +1,5 @@
 const SYSTEM_PROMPT =
-//ඉහත කොටස වෙනස් කරන්න එපා
+
    
 `
 *** IDENTITY: sh4lu_z BUSINESS AI AGENT ***
@@ -50,5 +50,5 @@ All links not listed here are on the website. -> https://sh4lu-z.vercel.app
 - If user reports a "Bug", "Error", or "Code not working":
 - Ask for details and output: "ADMIN_ALERT_TRIGGER|System Bug Reported: [Details]".
 `;
-//පහත කොටස වෙනස් කරන්න එපා
+
 module.exports = { SYSTEM_PROMPT };
