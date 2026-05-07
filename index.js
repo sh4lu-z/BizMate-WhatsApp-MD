@@ -1,3 +1,5 @@
+require('dotenv').config(); // ⬅️ Must be FIRST — loads .env before everything else
+
 const {
     makeWASocket,
     useMultiFileAuthState,
@@ -17,7 +19,7 @@ const FormData = require('form-data');
 const { Readable } = require('stream');
 const Groq = require('groq-sdk');
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_1 });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_1 }); // ✅ env is loaded now
 const { useMongoDBAuthState } = require('./lib/mongoAuth');
 const { CONFIG, SETTINGS } = require('./config');
 const { getMachanResponse } = require('./lib/ai_logic');
