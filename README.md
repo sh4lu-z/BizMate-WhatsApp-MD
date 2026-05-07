@@ -3,117 +3,91 @@
 
 <div align="center">
 
-![BizMate Banner](https://img.shields.io/badge/BizMate-WhatsApp_Business_Bot-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)
-[![Fork](https://img.shields.io/github/forks/sh4lu-z/BizMate-WhatsApp-MD?style=for-the-badge&label=FORK%20THIS%20REPO&color=blue)](https://github.com/sh4lu-z/BizMate-WhatsApp-MD/fork)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
+![BizMate Banner](./assets/banner.png)
+
+[![WhatsApp](https://img.shields.io/badge/BizMate-WhatsApp_Business_Bot-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/94740798233)
+[![Session](https://img.shields.io/badge/Get_Session-Syntiox_Sync-blue?style=for-the-badge&logo=vercel)](https://syntiox-sync.vercel.app/)
+[![License](https://img.shields.io/github/license/sh4lu-z/BizMate-WhatsApp-MD?style=for-the-badge&color=orange)](./LICENSE)
 
 </div>
 
 ---
 
-> **BizMate** is a next-generation AI-driven E-commerce assistant designed for WhatsApp. Powered by **Baileys**, **Llama 3 (Groq)**, and **MongoDB**, it intelligently understands customer intent, manages inventory, and streamlines sales across **English, Sinhala, and Singlish**.
-
-🔥 **We are building this together!** BizMate is an open-source community project. Whether you are a beginner or a pro, we invite you to join us, find bugs, add new features, and make this the best WhatsApp bot out there. Scroll down to the **Contributing** section to see how you can be a part of our team! 🤝
+## 🌟 Overview
+**BizMate** is a professional-grade AI assistant for WhatsApp, specifically engineered for e-commerce and business automation. Built on top of the robust **Baileys** library and powered by **Llama 3 (Groq)**, it brings human-like interaction and smart search capabilities to your customer service.
 
 ---
 
-## 🏗️ Deployment (Docker Method)
-This is the most efficient way to deploy BizMate on a VPS or local machine, ensuring a stable and isolated environment.
+## ⚡ Quick Start
 
-### Prerequisites
-* [Docker](https://www.docker.com/) and Docker Compose installed.
-* A `.env` file configured with your API Keys and MongoDB URL.
+### 1️⃣ Get Your Session ID
+Before deploying, you need a WhatsApp session. Use our secure bridge to generate one:
+👉 **[Syntiox Sync - Generate Session](https://syntiox-sync.vercel.app/)**
 
-### Step 1: Clone & Configure
-First, clone the repository and navigate into the project directory:
+### 2️⃣ Deployment Methods
 
+#### 🏠 Local / VPS Deployment (Interactive)
+For Windows, Linux, or VPS with terminal access, use our automated setup script:
 ```bash
-git clone [https://github.com/sh4lu-z/BizMate-WhatsApp-MD.git](https://github.com/sh4lu-z/BizMate-WhatsApp-MD.git)
-```
-```bash
-cd BizMate-WhatsApp-MD
-```
-
-Open the .env file to add your credentials:
-
-nano .env
-
-Step 2: Build & Run with Docker
-
-With Docker, you don't need to worry about manual dependency installation. Simply run:
-```bash
-docker compose up -d --build
+npm install
+npm run setup
+npm start
 ```
 
-<h2 align="center">🌟 Key Features</h2>
+#### ☁️ Cloud Deployment (Koyeb, Heroku, Railway)
+For cloud platforms, you don't need a `.env` file. Instead, add the following **Environment Variables** in your platform's dashboard:
 
-<table width="100%">
-<tr>
-<td width="50%">
-<b>🧠 Smart Intent Detection</b><br align="left">
-Uses advanced AI to distinguish between casual inquiries and serious purchase intent, providing appropriate responses automatically.
-</td>
-<td width="50%">
-<b>🏷️ AI Keyword Generation</b><br align="left">
-When a product is added, the AI automatically generates 25+ relevant keywords to optimize search and organization.
-</td>
-</tr>
-<tr>
-<td>
-<b>☁️ Cloud Inventory Management</b><br align="left">
-Integrated with <b>Catbox</b>, ensuring all product images and videos are stored safely in the cloud.
-</td>
-<td>
-<b>🚫 Anti-Call System</b><br align="left">
-Automatically manages and rejects unsolicited WhatsApp calls to ensure uninterrupted business operations.
-</td>
-</tr>
-<tr>
-<td colspan="2" align="center">
-<b>🌍 Multilingual Support</b>
+| Key | Value Description |
+| :--- | :--- |
+| `MONGO_URL` | Your MongoDB Atlas connection string. |
+| `SESSION_ID` | The session ID from Syntiox Sync. |
+| `GROQ_API_KEY_1` | Your API key from Groq Console. |
+| `OWNER_PHONE` | Your phone number (e.g. 94740798233). |
+| `MASTER_CODE` | Secret code for admin commands. |
 
+---
 
+## 💎 Features at a Glance
 
-Seamlessly communicates in <b>English, Sinhala, and Singlish</b> to cater to a diverse customer base.
-</td>
-</tr>
-</table>
+| Feature | Description |
+| :--- | :--- |
+| **🧠 AI Intent Analyzer** | Automatically detects if a customer wants to buy, search, or just chat. |
+| **🛍️ Inventory Search** | Smart keyword-based product search across your entire catalog. |
+| **🗣️ Multilingual** | Fluent in English, Sinhala, and Singlish for local market dominance. |
+| **📦 Media Hosting** | Seamless integration with Catbox for high-speed product media hosting. |
+| **📞 Anti-Call** | Protects your bot from unsolicited calls with automated rejections. |
+| **🎛️ Command Panel** | Real-time control over bot modes (Public/Private) and settings via chat. |
 
-<h2 align="center">🤝 Let's Build Together! (Contributing)</h2>
+---
 
-<p align="center"><b>BizMate is a community-driven project!</b> We need YOUR help to make it better. Got a cool idea? Found a bug? Want to optimize some code? Come join our team!</p>
+## 🛠️ Detailed Configuration
 
-<table align="center">
-<tr>
-<th>Step</th>
-<th>Action</th>
-</tr>
-<tr>
-<td>01</td>
-<td><b>Fork</b> the project to your own GitHub account</td>
-</tr>
-<tr>
-<td>02</td>
-<td><b>Create</b> your feature branch (git checkout -b feature/AmazingFeature)</td>
-</tr>
-<tr>
-<td>03</td>
-<td><b>Commit</b> your changes with a clear message</td>
-</tr>
-<tr>
-<td>04</td>
-<td><b>Push</b> to your branch (git push origin feature/AmazingFeature)</td>
-</tr>
-<tr>
-<td>05</td>
-<td><b>Open</b> a Pull Request for us to review and merge! 🎉</td>
-</tr>
-</table>
+| Variable | Required | Description |
+| :--- | :--- | :--- |
+| `MONGO_URL` | Yes | MongoDB connection string. |
+| `SESSION_ID` | Yes | WhatsApp session ID. |
+| `GROQ_API_KEY_1` | Yes | Groq AI API Key. |
+| `OWNER_PHONE` | Yes | Allowed controller number. |
+| `PAIRING_NUMBER` | No | Alternative pairing method. |
+| `PORT` | No | Default is 8000. |
+
+---
+
+## 🤝 Contributing
+We love community contributions! Help us make BizMate even better.
+
+1.  **Fork** this repository.
+2.  **Clone** your fork.
+3.  **Create** a branch: `git checkout -b feature/cool-new-feature`.
+4.  **Commit** your changes.
+5.  **Push** to your branch.
+6.  **Open** a Pull Request.
+
+---
 
 <div align="center">
 
-Developed with ❤️ by the BizMate Community & sh4lu_z
-
-Connecting Business with AI
+Built with ❤️ by [**sh4lu_z**](https://www.google.com/search?q=shaluka+gimhan) and the **BizMate Community**.
+*Connecting Business with AI Excellence.*
 
 </div>
