@@ -1,88 +1,109 @@
-# 🤝 Contributing to BizMate-WhatsApp-MD
+# 🤝 Contributing to BizMate
 
-First off, thank you for considering contributing to **BizMate**! It's people like you that make this tool better for everyone. 🚀
+<div align="center">
 
-Whether you are fixing a bug, adding a new feature, or improving documentation, we value your help!
+> We're an open-source community project. Whether you're a beginner or a pro — **you belong here.** 🌟
 
----
+[![Issues](https://img.shields.io/github/issues/sh4lu-z/BizMate-WhatsApp-MD?style=for-the-badge)](https://github.com/sh4lu-z/BizMate-WhatsApp-MD/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-25D366?style=for-the-badge)](https://github.com/sh4lu-z/BizMate-WhatsApp-MD/pulls)
 
-## 🛠️ How Can You Help?
-
-There are many ways to contribute:
-1.  **Reporting Bugs:** Found something not working? Open an Issue!
-2.  **Suggesting Features:** Have a cool idea? Let us know.
-3.  **Code Contributions:** Fix bugs or add features by submitting a Pull Request.
-4.  **Improving Documentation:** Help us make the README or Wiki better.
-5.  **Localization:** Improve Sinhala or Singlish AI responses.
+</div>
 
 ---
 
-## 🚀 The Process of Contributing
+## 💡 Ways You Can Contribute
 
-Follow these steps to ensure your contribution gets merged quickly:
-
-### 1. Find an Issue or Create One
-Before you start coding, check the [Issues](https://github.com/sh4lu-z/BizMate-WhatsApp-MD/issues) tab. If you find something you want to work on, leave a comment. If it's a new idea, open a new issue first.
+| Type | Description |
+| :--- | :--- |
+| 🐛 **Bug Reports** | Found something broken? Open an Issue. |
+| ✨ **New Features** | Have a cool idea? Suggest it or build it. |
+| 📝 **Documentation** | Help us improve the README or Wiki. |
+| 🌍 **Localization** | Improve Sinhala / Singlish AI responses. |
+| ⚡ **Optimization** | Make the bot faster or more efficient. |
 
 ---
 
-### 2. Fork and Clone
-Fork the repository to your own GitHub account and clone it locally:
+## 🛠️ Step-by-Step Contribution Guide
+
+### 1️⃣ Find or Create an Issue
+Before writing any code, check the **[Issues](https://github.com/sh4lu-z/BizMate-WhatsApp-MD/issues)** tab to see if your idea or bug already exists.
+- If it exists → leave a comment saying you want to work on it.
+- If it's new → open a new issue first and describe what you plan to do.
+
+---
+
+### 2️⃣ Fork & Clone
+Fork the repo to your GitHub account, then clone it locally:
 ```bash
-git clone [https://github.com/YOUR_USERNAME/BizMate-WhatsApp-MD.git](https://github.com/YOUR_USERNAME/BizMate-WhatsApp-MD.git)
+git clone https://github.com/YOUR_USERNAME/BizMate-WhatsApp-MD.git
+cd BizMate-WhatsApp-MD
+npm install
+npm run setup  # Set up your .env file
 ```
+
 ---
 
-### 3. Create a Branch
-Always create a new branch for your work. Don't work on the main branch.
+### 3️⃣ Create a Branch
+**Never work on `main` directly.** Always create a dedicated branch:
 ```bash
-git checkout -b feature/YourFeatureName
-# OR
-git checkout -b fix/YourBugFixName
+# For a new feature:
+git checkout -b feature/your-feature-name
+
+# For a bug fix:
+git checkout -b fix/bug-description
 ```
+
 ---
 
-### 4. Make Your Changes
-Write clean, readable code.
+### 4️⃣ Make Your Changes
+- Follow the existing code style of the project.
+- Keep your changes focused — one feature/fix per Pull Request.
+- Test your changes before submitting.
 
-Follow the existing coding style of the project.
+---
 
-Test your changes thoroughly!
-
+### 5️⃣ Commit & Push
+Write clear, descriptive commit messages:
+```bash
 git add .
-git commit -m "Brief description of what you did"
-git push origin your-branch-name
----
-
-### 5. Commit and Push
-```bash
-git add .
-git commit -m "Brief description of what you did"
+git commit -m "feat: add auto-reply for product inquiries"
 git push origin your-branch-name
 ```
----
 
-### 6. Open a Pull Request (PR)
-
-Go to the original BizMate repository and you will see a "Compare & pull request" button.
-
-Provide a clear title and description of your changes.
-
-Link the PR to the relevant Issue (e.g., "Fixes #12").
+**Commit message prefixes:**
+- `feat:` → New feature
+- `fix:` → Bug fix
+- `docs:` → Documentation change
+- `refactor:` → Code improvement (no behavior change)
 
 ---
 
-### Code of Conduct
-Be respectful to other contributors.
+### 6️⃣ Open a Pull Request
+1. Go to the **[original BizMate repository](https://github.com/sh4lu-z/BizMate-WhatsApp-MD)**.
+2. Click **"Compare & pull request"**.
+3. Give your PR a clear title and description.
+4. Link it to the related Issue (e.g., `Fixes #12`).
+5. Wait for review — we'll get back to you! ✅
 
-Provide constructive feedback.
+---
 
-Help beginners—we were all beginners once!
+## 📋 Code of Conduct
+
+- ✅ Be respectful and welcoming to everyone.
+- ✅ Give constructive and kind feedback.
+- ✅ Help beginners — we were all new once.
+- ❌ No harassment, discrimination, or toxic behavior.
 
 ---
 
 ## 💬 Need Help?
 
-If you have questions or get stuck, feel free to open an issue with the label question or contact the maintainers.
+Stuck? Have a question? Open an issue with the **`question`** label and we'll help you out.
 
-Happy Coding! Let's make BizMate the best AI Business Assistant! 🌟
+<div align="center">
+
+**Happy coding! Let's build the best WhatsApp Business AI together. 🚀**
+
+Made with ❤️ by [**sh4lu_z**](https://www.google.com/search?q=shaluka+gimhan)
+
+</div>
