@@ -23,3 +23,5 @@ Thumbs.db
 dist/
 build/
 docker-compose.override.yml
+
+node_modules
