@@ -36,6 +36,12 @@ const askQuestion = (index) => {
     const q = questions[index];
     rl.question(`${q.label}${q.default ? `[default: ${q.default}] ` : ''}`, (answer) => {
         envData[q.key] = answer.trim() || q.default;
+        
+        // Auto-fill OWNER_PHONE with PAIRING_NUMBER if left empty
+        if (q.key === 'OWNER_PHONE' && !envData[q.key]) {
+            envData[q.key] = envData['PAIRING_NUMBER'];
+        }
+
         askQuestion(index + 1);
     });
 };

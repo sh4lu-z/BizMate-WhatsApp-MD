@@ -113,7 +113,7 @@ No terminal needed. In your platform's dashboard, go to **"Environment Variables
 | `PAIRING_NUMBER` | ✅ | Your WhatsApp number used at Syntiox Sync (e.g. `94763929543`) |
 | `MONGO_URL` | ✅ | Your MongoDB Atlas connection string |
 | `GROQ_API_KEY_1` | ✅ | API key from [console.groq.com](https://console.groq.com) |
-| `OWNER_PHONE` | ✅ | Your WhatsApp number (bot owner, e.g. `94763929543`) |
+| `OWNER_PHONE` | ❌ | Bot owner's number. If empty, uses `PAIRING_NUMBER` |
 | `MASTER_CODE` | ✅ | Secret code for admin commands |
 | `GROQ_API_KEY_2` | ❌ | Optional 2nd Groq API key for rotation |
 | `PORT` | ❌ | Default is `8000` |
