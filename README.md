@@ -2,7 +2,9 @@
 
 <div align="center">
 
-![BizMate Banner](./assets/banner.png)
+<p align="center">
+  <img src="./assets/banner.png" alt="BizMate Banner" width="600">
+</p>
 
 <br>
 
