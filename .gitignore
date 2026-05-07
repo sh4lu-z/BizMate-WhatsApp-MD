@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment Variables
+.env
+
+# AI Chat History
+lib/history/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Build/Docker
+dist/
+build/
+docker-compose.override.yml

@@ -7,11 +7,12 @@ const rl = readline.createInterface({
 });
 
 const questions = [
-    { key: 'MONGO_URL', label: '🛢️ MongoDB URL: ', default: '' },
-    { key: 'SESSION_ID', label: '🔑 Session ID (from Syntiox Sync): ', default: '' },
-    { key: 'GROQ_API_KEY_1', label: '🤖 Groq API Key: ', default: '' },
-    { key: 'OWNER_PHONE', label: '👤 Owner Phone (e.g. 947xxx): ', default: '' },
-    { key: 'MASTER_CODE', label: '🔐 Master Code (for commands): ', default: 'sha2008@' },
+    { key: 'MONGO_URL',        label: '🛢️  MongoDB URL           : ', default: '' },
+    { key: 'SESSION_ID',       label: '🔑  Session ID (Syntiox)  : ', default: '' },
+    { key: 'PAIRING_NUMBER',   label: '📱  Pairing Number (94xxx): ', default: '' },
+    { key: 'GROQ_API_KEY_1',   label: '🤖  Groq API Key          : ', default: '' },
+    { key: 'OWNER_PHONE',      label: '👤  Owner Phone (94xxx)   : ', default: '' },
+    { key: 'MASTER_CODE',      label: '🔐  Master Code           : ', default: 'sha2008@' },
 ];
 
 const envData = {};
