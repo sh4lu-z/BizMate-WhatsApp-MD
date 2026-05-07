@@ -22,10 +22,7 @@ const { useMongoDBAuthState } = require('./mongoAuth');
 const { CONFIG, SETTINGS } = require('./config');
 const { getMachanResponse } = require('./ai_logic');
 
-
-// ============================================
 // 📦 BUSINESS PRODUCT SCHEMA (UPDATED)
-// ============================================
 const productSchema = new mongoose.Schema({
     category: { type: String, index: true },
     name: String,
@@ -55,9 +52,6 @@ let sock;
 const msgRetryCounter = new Set();
 
 
-// ============================================
-// ☁️ CLOUD UPLOADER (CATBOX - 200MB & PERMANENT)
-// ============================================
 async function uploadToCloud(buffer, type) {
     try {
         const form = new FormData();
@@ -87,12 +81,9 @@ async function uploadToCloud(buffer, type) {
     }
 }
 
-// ============================================
-// 🧠 AI KEYWORD GENERATOR (GROQ - LLAMA 3)
-// ============================================
+
 async function generateSmartKeywords(name, category, desc) {
     try {
-        // 🔥 PROMPT UPDATE: REMOVE GENERIC WORDS (PRICE, SALE, ETC.)
         const prompt = `
         Act as a Product Categorization AI for a Sri Lankan WhatsApp bot.
         Product: ${name}
@@ -134,18 +125,14 @@ async function generateSmartKeywords(name, category, desc) {
     }
 }
 
-// ============================================================
 // 🚀 MAIN BOT FUNCTION
-// ============================================================
 async function startBot() {
-    console.log("🚀 Bot Starting...");
 
-    // 🔴 FIX: පරණ Listeners අයින් කිරීම (මේක අලුත් Socket එක හදන්න කලින් කරන්න ඕනේ)
     if (sock) {
         sock.ev.removeAllListeners('messages.upsert');
         sock.ev.removeAllListeners('connection.update');
         sock.ev.removeAllListeners('creds.update');
-        sock.ev.removeAllListeners('call'); // Anti-call listener එකත් අයින් කරන්න ඕනේ
+        sock.ev.removeAllListeners('call'); 
     }
 
     // 1. Connect MongoDB
@@ -171,7 +158,6 @@ async function startBot() {
     const { version } = await fetchLatestBaileysVersion();
 
     // 4. Create Socket
-    // 4. Create Socket
     sock = makeWASocket({
         version,
         auth: state,
@@ -180,39 +166,14 @@ async function startBot() {
         browser: ["Ubuntu", "Chrome", "20.0.04"],
         markOnlineOnConnect: false, 
         generateHighQualityLinkPreview: false,
-        syncFullHistory: false,        // Start එක වේගවත් කරයි
-        connectTimeoutMs: 60000,       // Connection එකට තත්පර 60ක් දෙයි
-        defaultQueryTimeoutMs: 0,  // Query වලට කාලය දෙයි
-        keepAliveIntervalMs: 10000,    // Disconnect නොවී තියාගනී
-        retryRequestDelayMs: 5000      // Error ආවොත් හිමින් ට්‍රයි කරයි
+        syncFullHistory: false,     
+        connectTimeoutMs: 60000,    
+        defaultQueryTimeoutMs: 0, 
+        keepAliveIntervalMs: 10000,   
+        retryRequestDelayMs: 5000    
     });
 
-    // ============================================================
-    // 🔢 PAIRING CODE LOGIC (මෙන්න ඔයා ඉල්ලපු කෑල්ල)
-    // ============================================================
-    if (!sock.authState.creds.registered) {
-        const phoneNumber = CONFIG.PAIRING_NUMBER;
-        if (!phoneNumber || phoneNumber === "947XXXXXXXX") {
-            console.log("⚠︎ Pairing Number එක හරියට දාලා නෑ! Config එකේ නම්බර් එක හදන්න.");
-        } else {
-            setTimeout(async () => {
-                try {
-                    console.log(`⏳ Pairing Code ගන්න ට්‍රයි කරනවා: ${phoneNumber}`);
-                    let code = await sock.requestPairingCode(phoneNumber);
-                    code = code?.match(/.{1,4}/g)?.join("-") || code;
-                    console.log("\n==================================================");
-                    console.log("🔐 YOUR PAIRING CODE:  " + code);
-                    console.log("==================================================\n");
-                } catch (err) {
-                    console.log("❌ Pairing Code Error: ", err);
-                }
-            }, 3000);
-        }
-    }
-
-    // ============================================================
     // 📞 ANTI-CALL SYSTEM
-    // ============================================================
     sock.ev.on('call', async (node) => {
         if (!SETTINGS.anticall) return;
         const { id, from, status } = node[0];
@@ -243,13 +204,11 @@ async function startBot() {
     }
 });
 
-    // ============================================================
+
     // 📩 MESSAGE HANDLER (FIXED)
-    // ============================================================
     const saveSettings = async () => {
         try {
             await GlobalData.findByIdAndUpdate("bot_master_data", { settings: SETTINGS }, { upsert: true });
-            // console.log("💾 Settings Saved to DB");
         } catch (err) {
             console.log("❌ DB Save Error:", err.message);
         }
@@ -270,20 +229,17 @@ async function startBot() {
         const from = msg.key.remoteJid;
         const msgId = msg.key.id;
 
-        // 🛡️ 1. ID එකෙන් චෙක් කිරීම (Original Deduplication)
         if (processedMsgIds.has(msgId)) {
             console.log(`⚠️ [DEDUPLICATED] Ignoring Message ID: ${msgId}`);
             return; 
         }
         
-        // 🛡️ 2. TIME-BASED GUARD (LID හොල්මන පන්නන්න)
-        // එකම කෙනාගෙන් තත්පර 2ක් ඇතුළත මැසේජ් එකක් ආවොත් ඒක ignore කරනවා (ID එක වෙනස් වුණත්)
         const now = Date.now();
         if (lastMsgTime[from] && (now - lastMsgTime[from] < 2000)) {
             console.log(`🚫 [COOLDOWN] Ignoring fast duplicate from: ${from}`);
             return;
         }
-        lastMsgTime[from] = now; // අන්තිමට මැසේජ් එකක් ආපු වෙලාව සටහන් කරගන්නවා
+        lastMsgTime[from] = now; 
 
         console.log(`✅ [NEW MESSAGE] Processing ID: ${msgId}`);
         processedMsgIds.add(msgId);
@@ -298,29 +254,20 @@ async function startBot() {
             msg.message = msg.message.ephemeralMessage.message;
         }
 
-        // --- මෙතනදී ටෙක්ස්ට් එක කලින්ම ගමු 'Empty' ද බලන්න ---
         const type = Object.keys(msg.message)[0];
         const text = (type === 'conversation' ? msg.message.conversation :
                      type === 'extendedTextMessage' ? msg.message.extendedTextMessage.text :
                      type === 'imageMessage' ? msg.message.imageMessage.caption : '') || '';
 
-        // 🛡️ 3. EMPTY TEXT GUARD (ලොග් එකේ තිබ්බ හිස් මැසේජ් එක නවත්තන්න)
         if (!text || text.trim().length === 0) {
             console.log(`🚫 [EMPTY IGNORED] Message body is empty.`);
             return;
         }
-        // ============================================================
-        // 🟢 1. AUTO STATUS VIEW & REACT (Status ආවොත් මෙතනින් ඉවරයි)
-        // ============================================================
+
         if (msg.key.remoteJid === 'status@broadcast') {
             if (SETTINGS.autostatus) {
-                // Human වගේ පේන්න තත්පර 2ක් ඉන්නවා
-                await new Promise(r => setTimeout(r, 2000));
-                
-                // Status එක Seen කරනවා
+                await new Promise(r => setTimeout(r, 2000)); 
                 await sock.readMessages([msg.key]);
-
-                // React කරනවා
                 if (SETTINGS.autoreact) {
                     await sock.sendMessage(
                         msg.key.remoteJid, 
@@ -332,21 +279,12 @@ async function startBot() {
             return; 
         }
 
-        // ============================================================
-        // 🕵️‍♂️ REAL NUMBER EXTRACTOR (SAFE - NO KEY MODIFICATION)
-        // ============================================================
-        
-      
         const from = msg.key.remoteJid;
         
-  
         let rawSender = (msg.key.participant || from).split(':')[0] + 
                        ((msg.key.participant || from).includes('@g.us') ? '@g.us' : '@s.whatsapp.net');
         let realNumber = msg.key.participantAlt || msg.key.remoteJidAlt || rawSender;
         const senderNum = realNumber.split('@')[0].split(':')[0];
-        // ============================================================
-        // 🛑 LOOP PROTECTION (බොට් තමන්ටම reply කරගැනීම වැළැක්වීම)
-        // ============================================================
         if (msg.key.fromMe) return; 
 
         // Message Type & Text ගැනීම
@@ -358,7 +296,6 @@ async function startBot() {
         const isGroup = from.endsWith('@g.us');
         if (isGroup || from.includes('@newsletter')) return;
 
-        // 2. AUTO REACT (මෙතන msg.key එක original එකම පාවිච්චි වෙනවා)
         if (SETTINGS.autoreact && !text.startsWith('#')) {
              try {
                  await sock.sendMessage(from, { react: { text: SETTINGS.auto_emoji, key: msg.key } });
@@ -368,14 +305,10 @@ async function startBot() {
         }
         if (msg.key.fromMe) return;
 
-        // ============================================================
-        // 🎛️ OWNER PANEL (#cmd) - SWITCHES
-        // ============================================================
             if (text.startsWith('#cmd')) {
                 const parts = text.trim().split(/\s+/);
                 const isOwner = senderNum === CONFIG.OWNER_PHONE || senderNum === CONFIG.OWNER_NUMBER;
                 
-                // Owner හෝ Password එක හරි නම් විතරයි
                 if (isOwner || parts[1] === SETTINGS.master_code) {
                     let cmd = isOwner ? parts[1] : parts[2];
                     let arg = isOwner ? parts[2] : parts[3];
@@ -407,23 +340,15 @@ async function startBot() {
                 }
             }
 
-            // ============================================================
-            // 💻 SYSTEM INFO (#system)
-            // ============================================================
             if (text.toLowerCase() === '#system') {
                 const usedRAM = process.memoryUsage().rss / 1024 / 1024;
                 return await sock.sendMessage(from, { text: `💻 RAM: ${usedRAM.toFixed(2)} MB\n🤖 Public Mode: ${SETTINGS.public_mode}` });
             }
-            // ============================================================
-// 🛍️ BUSINESS PRODUCT ADDING SYSTEM (INTERACTIVE)
-// ============================================================
 
-// 1️⃣ Admin අලුත් බාණ්ඩයක් දාන්න හදනවද? (#add with Image/Video)
 const isMedia = msg.message.imageMessage || msg.message.videoMessage;
 const caption = (msg.message.imageMessage?.caption || msg.message.videoMessage?.caption || "").trim();
 
 if (isMedia && caption.startsWith('#add')) {
-    // Owner Check (ඔයාගේ ක්‍රමේට)
     const isOwner = senderNum === CONFIG.OWNER_PHONE || senderNum === CONFIG.OWNER_NUMBER;
     
     if (isOwner) {
@@ -462,7 +387,6 @@ if (isMedia && caption.startsWith('#add')) {
     }
 }
 
-// 2️⃣ Admin ප්‍රශ්න වලට උත්තර දෙනවද? (Session Handling)
 if (productSession[senderNum]) {
     const session = productSession[senderNum];
     const userText = text.trim();
@@ -526,12 +450,9 @@ if (productSession[senderNum]) {
         });
     }
 }   
-            // ============================================================
-            // 🤖 AI LOGIC (IF NOT #)
-            // ============================================================
-            if (text.startsWith('#')) return; // # ගැහුවොත් AI එකට යන්නේ නෑ
 
-            // System Off නම් හෝ Private Mode එකේදී පිට අයට වැඩ නෑ
+            if (text.startsWith('#')) return; 
+
             const isOwner = senderNum === CONFIG.OWNER_PHONE || senderNum === CONFIG.OWNER_NUMBER;
             if (!SETTINGS.system && !isOwner) return;
             if (!SETTINGS.public_mode && !isOwner) return;
