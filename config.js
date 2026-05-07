@@ -1,12 +1,13 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
+const pairingNumber = process.env.PAIRING_NUMBER || "";
+const ownerPhone = process.env.OWNER_PHONE || pairingNumber;
+
 const CONFIG = {
-    
-    PAIRING_NUMBER: process.env.PAIRING_NUMBER, 
-    OWNER_PHONE: process.env.OWNER_PHONE,
-    OWNER_NUMBER: "207588872446040",
-    
+    PAIRING_NUMBER: pairingNumber, 
+    OWNER_PHONE: ownerPhone,
+    OWNER_NUMBER: ownerPhone,
 
     // 💾 Database & Session 
     MONGO_URL: process.env.MONGO_URL, 
@@ -16,6 +17,7 @@ const CONFIG = {
 let SETTINGS = { 
     system: true,       
     public_mode: false,  // 🔒 Public Mode (False = Owner only)
+    ai_chat: true,       // 🤖 AI Chat Reply
     anticall: true,      // 📞 Anti-Call
     autostatus: true,    // 👀 Auto Status View
     autoreact: true,     // ✨ Auto React

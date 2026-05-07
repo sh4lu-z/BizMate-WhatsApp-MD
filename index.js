@@ -1,3 +1,5 @@
+require('dotenv').config(); // ⬅️ Must be FIRST — loads .env before everything else
+
 const {
     makeWASocket,
     useMultiFileAuthState,
@@ -17,7 +19,7 @@ const FormData = require('form-data');
 const { Readable } = require('stream');
 const Groq = require('groq-sdk');
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_1 });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_1 }); // ✅ env is loaded now
 const { useMongoDBAuthState } = require('./lib/mongoAuth');
 const { CONFIG, SETTINGS } = require('./config');
 const { getMachanResponse } = require('./lib/ai_logic');
@@ -217,13 +219,16 @@ async function startBot() {
             const { messages, type: eventType } = upsert;
             console.log(`\n📥 [EVENT RECEIVED] Type: ${eventType} | ID: ${messages[0]?.key?.id}`);
 
-            if (eventType !== 'notify') return;
+            if (eventType !== 'notify' && eventType !== 'append') return;
 
             let msg = messages[0];
-            if (!msg.message || msg.key.fromMe) return;
+            if (!msg.message) return;
 
             const from = msg.key.remoteJid;
             const msgId = msg.key.id;
+
+            // 🚫 Immediately ignore Channel / Newsletter messages
+            if (from.includes('@newsletter')) return;
 
             if (processedMsgIds.has(msgId)) {
                 console.log(`⚠️ [DEDUPLICATED] Ignoring Message ID: ${msgId}`);
@@ -250,15 +255,26 @@ async function startBot() {
                 msg.message = msg.message.ephemeralMessage.message;
             }
 
-            const type = Object.keys(msg.message)[0];
-            const text = (type === 'conversation' ? msg.message.conversation :
-                type === 'extendedTextMessage' ? msg.message.extendedTextMessage.text :
-                    type === 'imageMessage' ? msg.message.imageMessage.caption : '') || '';
+            // Better text extraction (handles Baileys metadata keys)
+            let text = '';
+            if (msg.message?.conversation) {
+                text = msg.message.conversation;
+            } else if (msg.message?.extendedTextMessage?.text) {
+                text = msg.message.extendedTextMessage.text;
+            } else if (msg.message?.imageMessage?.caption) {
+                text = msg.message.imageMessage.caption;
+            } else if (msg.message?.videoMessage?.caption) {
+                text = msg.message.videoMessage.caption;
+            }
 
             if (!text || text.trim().length === 0) {
-                console.log(`🚫 [EMPTY IGNORED] Message body is empty.`);
+                // Not logging empty messages to avoid console spam
                 return;
             }
+
+            // Allow the bot owner to send commands from their own number (fromMe), 
+            // but ignore the bot's own normal messages to prevent infinite loops.
+            if (msg.key.fromMe && !text.startsWith('#')) return;
 
             if (msg.key.remoteJid === 'status@broadcast') {
                 if (SETTINGS.autostatus) {
@@ -278,10 +294,16 @@ async function startBot() {
             let rawSender = (msg.key.participant || from).split(':')[0] +
                 ((msg.key.participant || from).includes('@g.us') ? '@g.us' : '@s.whatsapp.net');
             let realNumber = msg.key.participantAlt || msg.key.remoteJidAlt || rawSender;
-            const senderNum = realNumber.split('@')[0].split(':')[0];
+            let senderNum = realNumber.split('@')[0].split(':')[0];
+
+            if (msg.key.fromMe) {
+                senderNum = CONFIG.OWNER_PHONE;
+            }
+
+            console.log(`💬 [MESSAGE] From: ${senderNum} ${msg.key.fromMe ? '(Owner/fromMe)' : ''} | Text: "${text}"`);
 
             const isGroup = from.endsWith('@g.us');
-            if (isGroup || from.includes('@newsletter')) return;
+            if (isGroup) return;
 
             if (SETTINGS.autoreact && !text.startsWith('#')) {
                 try {
@@ -301,29 +323,34 @@ async function startBot() {
                     let arg = isOwner ? parts[2] : parts[3];
 
                     if (!cmd) {
-                        return await sock.sendMessage(from, {
-                            text: `
+                        const menuText = `
 🎛️ *CONTROL PANEL*
 ------------------
 (#cmd <option> <on/off>)
 
 🔹 system : ${SETTINGS.system ? '✅' : '🔴'}
 🔹 mode : ${SETTINGS.public_mode ? '🌍' : '🔒'}
+🔹 ai : ${SETTINGS.ai_chat ? '✅' : '🔴'}
 🔹 anticall : ${SETTINGS.anticall ? '✅' : '🔴'}
 🔹 autostatus : ${SETTINGS.autostatus ? '✅' : '🔴'}
 🔹 react : ${SETTINGS.autoreact ? '✅' : '🔴'}
-                        ` });
+                        `;
+                        console.log(`📤 [BOT REPLIED] To: ${senderNum} | Reply: "🎛️ Control Panel Sent"`);
+                        return await sock.sendMessage(from, { text: menuText });
                     }
 
                     if (cmd === 'system') SETTINGS.system = arg === 'on';
                     if (cmd === 'mode') SETTINGS.public_mode = arg === 'public';
+                    if (cmd === 'ai') SETTINGS.ai_chat = arg === 'on';
                     if (cmd === 'anticall') SETTINGS.anticall = arg === 'on';
                     if (cmd === 'autostatus') SETTINGS.autostatus = arg === 'on';
                     if (cmd === 'react') SETTINGS.autoreact = arg === 'on';
                     if (cmd === 'setemoji' && arg) SETTINGS.auto_emoji = arg;
 
                     await saveSettings();
-                    return await sock.sendMessage(from, { text: `✅ Setting Updated: ${cmd} -> ${arg}` });
+                    const replyText = `✅ Setting Updated: ${cmd} -> ${arg}`;
+                    console.log(`📤 [BOT REPLIED] To: ${senderNum} | Reply: "${replyText}"`);
+                    return await sock.sendMessage(from, { text: replyText });
                 }
             }
 
@@ -431,14 +458,15 @@ async function startBot() {
 
             if (!SETTINGS.system && !isOwner) return;
             if (!SETTINGS.public_mode && !isOwner) return;
+            if (!SETTINGS.ai_chat && !isOwner) return;
 
             try {
                 await sock.sendPresenceUpdate('composing', from);
                 console.log(`🤖 [AI CALL] Asking AI for text: "${text.substring(0, 20)}..."`);
                 const aiReply = await getMachanResponse(senderNum, from, text, isGroup, sock);
-                console.log(`🤖 [AI RESPONSE] Received reply: "${aiReply?.substring(0, 20)}..."`);
+                
                 if (aiReply) {
-                    console.log(`📤 [SENDING] Sending Message to ${from} (ID: ${msgId})`);
+                    console.log(`📤 [BOT REPLIED] To: ${senderNum} | Reply: "${aiReply.substring(0, 50).replace(/\n/g, ' ')}..."`);
                     await sock.sendMessage(from, { text: aiReply }, { quoted: msg });
                 }
                 await sock.sendPresenceUpdate('paused', from);

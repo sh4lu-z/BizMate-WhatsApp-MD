@@ -2,7 +2,9 @@
 
 <div align="center">
 
-![BizMate Banner](./assets/banner.png)
+<p align="center">
+  <img src="./assets/banner.png" alt="BizMate Banner" width="600">
+</p>
 
 <br>
 
@@ -108,12 +110,16 @@ No terminal needed. In your platform's dashboard, go to **"Environment Variables
 | Variable | Required | What to Put |
 | :--- | :---: | :--- |
 | `SESSION_ID` | ✅ | The Session ID from [Syntiox Sync](https://syntiox-sync.vercel.app/) |
+| `PAIRING_NUMBER` | ✅ | Your WhatsApp number used at Syntiox Sync (e.g. `94763929543`) |
 | `MONGO_URL` | ✅ | Your MongoDB Atlas connection string |
 | `GROQ_API_KEY_1` | ✅ | API key from [console.groq.com](https://console.groq.com) |
-| `OWNER_PHONE` | ✅ | Your WhatsApp number (e.g. `94740798233`) |
-| `MASTER_CODE` | ✅ | Secret code for using admin commands |
-| `PAIRING_NUMBER` | ❌ | Alternative to Session ID (optional) |
+| `OWNER_PHONE` | ❌ | Bot owner's number. If empty, uses `PAIRING_NUMBER` |
+| `MASTER_CODE` | ✅ | Secret code for admin commands |
+| `GROQ_API_KEY_2` | ❌ | Optional 2nd Groq API key for rotation |
 | `PORT` | ❌ | Default is `8000` |
+
+> **⚠️ Important:** `SESSION_ID` **and** `PAIRING_NUMBER` are both needed together.
+> The bot uses both to download your WhatsApp session from Syntiox Sync on first launch.
 
 ---
 
