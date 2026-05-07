@@ -1,16 +1,16 @@
-const { 
-    makeWASocket, 
-    useMultiFileAuthState, 
-    DisconnectReason, 
+const {
+    makeWASocket,
+    useMultiFileAuthState,
+    DisconnectReason,
     fetchLatestBaileysVersion,
     downloadContentFromMessage
 } = require('@whiskeysockets/baileys');
 const pino = require('pino');
-const mongoose = require('mongoose'); 
+const mongoose = require('mongoose');
 const fs = require('fs');
-const path = require('path'); 
+const path = require('path');
 const axios = require('axios');
-const os = require('os'); 
+const os = require('os');
 const process = require('process');
 const { performance } = require('perf_hooks');
 const FormData = require('form-data');
@@ -18,22 +18,19 @@ const { Readable } = require('stream');
 const Groq = require('groq-sdk');
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_1 });
-const { useMongoDBAuthState } = require('./mongoAuth');
+const { useMongoDBAuthState } = require('./lib/mongoAuth');
 const { CONFIG, SETTINGS } = require('./config');
-const { getMachanResponse } = require('./ai_logic');
+const { getMachanResponse } = require('./lib/ai_logic');
 
-// 📦 BUSINESS PRODUCT SCHEMA (UPDATED)
 const productSchema = new mongoose.Schema({
     category: { type: String, index: true },
     name: String,
     price: String,
     desc: String,
-    mediaUrl: String,   
-    mediaType: String,  
+    mediaUrl: String,
+    mediaType: String,
     addedBy: String,
-    
-   
-    keywords: { type: [String], index: true } 
+    keywords: { type: [String], index: true }
 });
 const Product = mongoose.model('Products', productSchema);
 
@@ -48,7 +45,7 @@ const globalDataSchema = new mongoose.Schema({
 const GlobalData = mongoose.model('GlobalData', globalDataSchema);
 const lastMsgTime = {};
 const processedMsgIds = new Set();
-let sock; 
+let sock;
 const msgRetryCounter = new Set();
 
 
@@ -60,7 +57,7 @@ async function uploadToCloud(buffer, type) {
         form.append('fileToUpload', buffer, type === 'image' ? 'image.jpg' : 'video.mp4');
 
         const response = await axios.post('https://catbox.moe/user/api.php', form, {
-            headers: { 
+            headers: {
                 ...form.getHeaders(),
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
@@ -71,7 +68,7 @@ async function uploadToCloud(buffer, type) {
             console.log("✅ Uploaded to Catbox:", response.data);
             return response.data.trim();
         }
-        
+
         console.log("❌ Upload Failed (Response):", response.data);
         return null;
 
@@ -109,8 +106,8 @@ async function generateSmartKeywords(name, category, desc) {
 
         const chatCompletion = await groq.chat.completions.create({
             messages: [{ role: 'user', content: prompt }],
-            model: 'llama-3.3-70b-versatile', 
-            temperature: 0, 
+            model: 'llama-3.3-70b-versatile',
+            temperature: 0,
         });
 
         const content = chatCompletion.choices[0]?.message?.content || "[]";
@@ -132,7 +129,7 @@ async function startBot() {
         sock.ev.removeAllListeners('messages.upsert');
         sock.ev.removeAllListeners('connection.update');
         sock.ev.removeAllListeners('creds.update');
-        sock.ev.removeAllListeners('call'); 
+        sock.ev.removeAllListeners('call');
     }
 
     // 1. Connect MongoDB
@@ -144,6 +141,7 @@ async function startBot() {
             console.log("⚠︎ MongoDB Error:", err.message);
         }
     }
+
     // 2. Load Settings
     try {
         const dbData = await GlobalData.findById("bot_master_data");
@@ -151,7 +149,7 @@ async function startBot() {
             SETTINGS = { ...SETTINGS, ...dbData.settings };
             console.log("✅ Settings Loaded!");
         }
-    } catch (e) {}
+    } catch (e) { }
 
     // 3. Auth Strategy
     const { state, saveCreds } = await useMongoDBAuthState(CONFIG.SESSION_ID);
@@ -164,13 +162,13 @@ async function startBot() {
         logger: pino({ level: 'silent' }),
         printQRInTerminal: false,
         browser: ["Ubuntu", "Chrome", "20.0.04"],
-        markOnlineOnConnect: false, 
+        markOnlineOnConnect: false,
         generateHighQualityLinkPreview: false,
-        syncFullHistory: false,     
-        connectTimeoutMs: 60000,    
-        defaultQueryTimeoutMs: 0, 
-        keepAliveIntervalMs: 10000,   
-        retryRequestDelayMs: 5000    
+        syncFullHistory: false,
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 0,
+        keepAliveIntervalMs: 10000,
+        retryRequestDelayMs: 5000
     });
 
     // 📞 ANTI-CALL SYSTEM
@@ -180,32 +178,30 @@ async function startBot() {
         if (status === 'offer') {
             await sock.rejectCall(id, from);
             console.log(`📞 Rejected Call from ${from.split('@')[0]}`);
-               await sock.sendMessage(from, { text: "📵 No Calls Allowed!" });
+            await sock.sendMessage(from, { text: "📵 No Calls Allowed!" });
         }
     });
 
     sock.ev.on('creds.update', saveCreds);
 
     sock.ev.on('connection.update', async (update) => {
-    const { connection, lastDisconnect } = update;
-    
-    if (connection === 'close') {
-        const statusCode = lastDisconnect?.error?.output?.statusCode;
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-        
-        console.log(`Connection closed. Status: ${statusCode}. Reconnecting: ${shouldReconnect}`);
-        
-        if (shouldReconnect) {
-            // තත්පර 5ක් ඉඳලා එක පාරක් විතරක් Restart කරන්න
-            setTimeout(() => startBot(), 5000);
+        const { connection, lastDisconnect } = update;
+
+        if (connection === 'close') {
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+
+            console.log(`Connection closed. Status: ${statusCode}. Reconnecting: ${shouldReconnect}`);
+
+            if (shouldReconnect) {
+                setTimeout(() => startBot(), 5000);
+            }
+        } else if (connection === 'open') {
+            console.log('✅ Bot Connected successfully!');
         }
-    } else if (connection === 'open') {
-        console.log('✅ Bot Connected successfully!');
-    }
-});
+    });
 
-
-    // 📩 MESSAGE HANDLER (FIXED)
+    // 📩 MESSAGE HANDLER (FIXED BRACKETS)
     const saveSettings = async () => {
         try {
             await GlobalData.findByIdAndUpdate("bot_master_data", { settings: SETTINGS }, { upsert: true });
@@ -215,106 +211,98 @@ async function startBot() {
     };
 
     sock.ev.removeAllListeners('messages.upsert');
-        
+
     sock.ev.on('messages.upsert', async (upsert) => {
-    try {
-        const { messages, type: eventType } = upsert;
-        console.log(`\n📥 [EVENT RECEIVED] Type: ${eventType} | ID: ${messages[0]?.key?.id}`);
-        
-        if (eventType !== 'notify') return;
+        try {
+            const { messages, type: eventType } = upsert;
+            console.log(`\n📥 [EVENT RECEIVED] Type: ${eventType} | ID: ${messages[0]?.key?.id}`);
 
-        let msg = messages[0];
-        if (!msg.message || msg.key.fromMe) return;
+            if (eventType !== 'notify') return;
 
-        const from = msg.key.remoteJid;
-        const msgId = msg.key.id;
+            let msg = messages[0];
+            if (!msg.message || msg.key.fromMe) return;
 
-        if (processedMsgIds.has(msgId)) {
-            console.log(`⚠️ [DEDUPLICATED] Ignoring Message ID: ${msgId}`);
-            return; 
-        }
-        
-        const now = Date.now();
-        if (lastMsgTime[from] && (now - lastMsgTime[from] < 2000)) {
-            console.log(`🚫 [COOLDOWN] Ignoring fast duplicate from: ${from}`);
-            return;
-        }
-        lastMsgTime[from] = now; 
+            const from = msg.key.remoteJid;
+            const msgId = msg.key.id;
 
-        console.log(`✅ [NEW MESSAGE] Processing ID: ${msgId}`);
-        processedMsgIds.add(msgId);
+            if (processedMsgIds.has(msgId)) {
+                console.log(`⚠️ [DEDUPLICATED] Ignoring Message ID: ${msgId}`);
+                return;
+            }
 
-        if (processedMsgIds.size > 100) {
-            const firstEntry = processedMsgIds.values().next().value;
-            processedMsgIds.delete(firstEntry);
-        }
+            const now = Date.now();
+            if (lastMsgTime[from] && (now - lastMsgTime[from] < 2000)) {
+                console.log(`🚫 [COOLDOWN] Ignoring fast duplicate from: ${from}`);
+                return;
+            }
+            lastMsgTime[from] = now;
 
-        // 🛠️ FIX: Disappearing Messages 
-        if (msg.message.ephemeralMessage) {
-            msg.message = msg.message.ephemeralMessage.message;
-        }
+            console.log(`✅ [NEW MESSAGE] Processing ID: ${msgId}`);
+            processedMsgIds.add(msgId);
 
-        const type = Object.keys(msg.message)[0];
-        const text = (type === 'conversation' ? msg.message.conversation :
-                     type === 'extendedTextMessage' ? msg.message.extendedTextMessage.text :
-                     type === 'imageMessage' ? msg.message.imageMessage.caption : '') || '';
+            if (processedMsgIds.size > 100) {
+                const firstEntry = processedMsgIds.values().next().value;
+                processedMsgIds.delete(firstEntry);
+            }
 
-        if (!text || text.trim().length === 0) {
-            console.log(`🚫 [EMPTY IGNORED] Message body is empty.`);
-            return;
-        }
+            // 🛠️ FIX: Disappearing Messages 
+            if (msg.message.ephemeralMessage) {
+                msg.message = msg.message.ephemeralMessage.message;
+            }
 
-        if (msg.key.remoteJid === 'status@broadcast') {
-            if (SETTINGS.autostatus) {
-                await new Promise(r => setTimeout(r, 2000)); 
-                await sock.readMessages([msg.key]);
-                if (SETTINGS.autoreact) {
-                    await sock.sendMessage(
-                        msg.key.remoteJid, 
-                        { react: { text: SETTINGS.auto_emoji, key: msg.key } }, 
-                        { statusJidList: [msg.key.participant] }
-                    );
+            const type = Object.keys(msg.message)[0];
+            const text = (type === 'conversation' ? msg.message.conversation :
+                type === 'extendedTextMessage' ? msg.message.extendedTextMessage.text :
+                    type === 'imageMessage' ? msg.message.imageMessage.caption : '') || '';
+
+            if (!text || text.trim().length === 0) {
+                console.log(`🚫 [EMPTY IGNORED] Message body is empty.`);
+                return;
+            }
+
+            if (msg.key.remoteJid === 'status@broadcast') {
+                if (SETTINGS.autostatus) {
+                    await new Promise(r => setTimeout(r, 2000));
+                    await sock.readMessages([msg.key]);
+                    if (SETTINGS.autoreact) {
+                        await sock.sendMessage(
+                            msg.key.remoteJid,
+                            { react: { text: SETTINGS.auto_emoji, key: msg.key } },
+                            { statusJidList: [msg.key.participant] }
+                        );
+                    }
+                }
+                return;
+            }
+
+            let rawSender = (msg.key.participant || from).split(':')[0] +
+                ((msg.key.participant || from).includes('@g.us') ? '@g.us' : '@s.whatsapp.net');
+            let realNumber = msg.key.participantAlt || msg.key.remoteJidAlt || rawSender;
+            const senderNum = realNumber.split('@')[0].split(':')[0];
+
+            const isGroup = from.endsWith('@g.us');
+            if (isGroup || from.includes('@newsletter')) return;
+
+            if (SETTINGS.autoreact && !text.startsWith('#')) {
+                try {
+                    await sock.sendMessage(from, { react: { text: SETTINGS.auto_emoji, key: msg.key } });
+                } catch (err) {
+                    console.log("⚠️ Reaction error:", err.message);
                 }
             }
-            return; 
-        }
 
-        const from = msg.key.remoteJid;
-        
-        let rawSender = (msg.key.participant || from).split(':')[0] + 
-                       ((msg.key.participant || from).includes('@g.us') ? '@g.us' : '@s.whatsapp.net');
-        let realNumber = msg.key.participantAlt || msg.key.remoteJidAlt || rawSender;
-        const senderNum = realNumber.split('@')[0].split(':')[0];
-        if (msg.key.fromMe) return; 
-
-        // Message Type & Text ගැනීම
-        const type = Object.keys(msg.message)[0];
-        const text = type === 'conversation' ? msg.message.conversation :
-                     type === 'extendedTextMessage' ? msg.message.extendedTextMessage.text :
-                     type === 'imageMessage' ? msg.message.imageMessage.caption : '';
-
-        const isGroup = from.endsWith('@g.us');
-        if (isGroup || from.includes('@newsletter')) return;
-
-        if (SETTINGS.autoreact && !text.startsWith('#')) {
-             try {
-                 await sock.sendMessage(from, { react: { text: SETTINGS.auto_emoji, key: msg.key } });
-             } catch (err) {
-                 console.log("⚠️ Reaction error:", err.message);
-             }
-        }
-        if (msg.key.fromMe) return;
+            const isOwner = senderNum === CONFIG.OWNER_PHONE || senderNum === CONFIG.OWNER_NUMBER;
 
             if (text.startsWith('#cmd')) {
                 const parts = text.trim().split(/\s+/);
-                const isOwner = senderNum === CONFIG.OWNER_PHONE || senderNum === CONFIG.OWNER_NUMBER;
-                
+
                 if (isOwner || parts[1] === SETTINGS.master_code) {
                     let cmd = isOwner ? parts[1] : parts[2];
                     let arg = isOwner ? parts[2] : parts[3];
 
                     if (!cmd) {
-                        return await sock.sendMessage(from, { text: `
+                        return await sock.sendMessage(from, {
+                            text: `
 🎛️ *CONTROL PANEL*
 ------------------
 (#cmd <option> <on/off>)
@@ -332,7 +320,6 @@ async function startBot() {
                     if (cmd === 'anticall') SETTINGS.anticall = arg === 'on';
                     if (cmd === 'autostatus') SETTINGS.autostatus = arg === 'on';
                     if (cmd === 'react') SETTINGS.autoreact = arg === 'on';
-                    
                     if (cmd === 'setemoji' && arg) SETTINGS.auto_emoji = arg;
 
                     await saveSettings();
@@ -345,120 +332,107 @@ async function startBot() {
                 return await sock.sendMessage(from, { text: `💻 RAM: ${usedRAM.toFixed(2)} MB\n🤖 Public Mode: ${SETTINGS.public_mode}` });
             }
 
-const isMedia = msg.message.imageMessage || msg.message.videoMessage;
-const caption = (msg.message.imageMessage?.caption || msg.message.videoMessage?.caption || "").trim();
+            const isMedia = msg.message.imageMessage || msg.message.videoMessage;
+            const caption = (msg.message.imageMessage?.caption || msg.message.videoMessage?.caption || "").trim();
 
-if (isMedia && caption.startsWith('#add')) {
-    const isOwner = senderNum === CONFIG.OWNER_PHONE || senderNum === CONFIG.OWNER_NUMBER;
-    
-    if (isOwner) {
-        await sock.sendMessage(from, { text: "⏳ Media Uploading... පොඩ්ඩක් ඉන්න..." });
+            if (isMedia && caption.startsWith('#add')) {
+                if (isOwner) {
+                    await sock.sendMessage(from, { text: "⏳ Media Uploading... පොඩ්ඩක් ඉන්න..." });
 
-        try {
-            // Download Media
-            const stream = await downloadContentFromMessage(
-                msg.message.imageMessage || msg.message.videoMessage,
-                msg.message.imageMessage ? 'image' : 'video'
-            );
-            let buffer = Buffer.from([]);
-            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+                    try {
+                        const stream = await downloadContentFromMessage(
+                            msg.message.imageMessage || msg.message.videoMessage,
+                            msg.message.imageMessage ? 'image' : 'video'
+                        );
+                        let buffer = Buffer.from([]);
+                        for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
-            // Upload to Cloud
-            const mediaUrl = await uploadToCloud(buffer, msg.message.imageMessage ? 'image' : 'video');
+                        const mediaUrl = await uploadToCloud(buffer, msg.message.imageMessage ? 'image' : 'video');
 
-            if (mediaUrl) {
-                // Start Session
-                productSession[senderNum] = {
-                    step: 'ASK_CATEGORY',
-                    data: {
-                        mediaUrl: mediaUrl,
-                        mediaType: msg.message.imageMessage ? 'image' : 'video',
-                        addedBy: senderNum
+                        if (mediaUrl) {
+                            productSession[senderNum] = {
+                                step: 'ASK_CATEGORY',
+                                data: {
+                                    mediaUrl: mediaUrl,
+                                    mediaType: msg.message.imageMessage ? 'image' : 'video',
+                                    addedBy: senderNum
+                                }
+                            };
+                            return await sock.sendMessage(from, { text: "✅ *Upload Done!*\n\nදැන් මේකේ **Category** එක එවන්න.\n(උදා: bottle, phone, shoe)" });
+                        } else {
+                            return await sock.sendMessage(from, { text: "❌ Upload Fail වුනා මචන්." });
+                        }
+                    } catch (e) {
+                        console.log(e);
+                        return await sock.sendMessage(from, { text: "❌ Error එකක්!" });
                     }
-                };
-                return await sock.sendMessage(from, { text: "✅ *Upload Done!*\n\nදැන් මේකේ **Category** එක එවන්න.\n(උදා: bottle, phone, shoe)" });
-            } else {
-                return await sock.sendMessage(from, { text: "❌ Upload Fail වුනා මචන්." });
+                }
             }
-        } catch (e) {
-            console.log(e);
-            return await sock.sendMessage(from, { text: "❌ Error එකක්!" });
-        }
-    }
-}
 
-if (productSession[senderNum]) {
-    const session = productSession[senderNum];
-    const userText = text.trim();
+            if (productSession[senderNum]) {
+                const session = productSession[senderNum];
+                const userText = text.trim();
 
-    if (session.step === 'ASK_CATEGORY') {
-        session.data.category = userText.toLowerCase();
-        session.step = 'ASK_NAME';
-        return await sock.sendMessage(from, { text: "එළ! 📦 දැන් මේ අයිටම් එකේ **නම (Name)** මොකක්ද?" });
-    }
+                if (session.step === 'ASK_CATEGORY') {
+                    session.data.category = userText.toLowerCase();
+                    session.step = 'ASK_NAME';
+                    return await sock.sendMessage(from, { text: "එළ! 📦 දැන් මේ අයිටම් එකේ **නම (Name)** මොකක්ද?" });
+                }
 
-    if (session.step === 'ASK_NAME') {
-        session.data.name = userText;
-        session.step = 'ASK_PRICE';
-        return await sock.sendMessage(from, { text: "හරි, 💰 මේකේ **මිල (Price)** කීයද?" });
-    }
+                if (session.step === 'ASK_NAME') {
+                    session.data.name = userText;
+                    session.step = 'ASK_PRICE';
+                    return await sock.sendMessage(from, { text: "හරි, 💰 මේකේ **මිල (Price)** කීයද?" });
+                }
 
-    if (session.step === 'ASK_PRICE') {
-        session.data.price = userText;
-        session.step = 'ASK_DESC';
-        return await sock.sendMessage(from, { text: "අන්තිම එක! 📝 මේක ගැන පොඩි **විස්තරයක් (Description)** එවන්න." });
-    }
+                if (session.step === 'ASK_PRICE') {
+                    session.data.price = userText;
+                    session.step = 'ASK_DESC';
+                    return await sock.sendMessage(from, { text: "අන්තිම එක! 📝 මේක ගැන පොඩි **විස්තරයක් (Description)** එවන්න." });
+                }
 
-    if (session.step === 'ASK_DESC') {
-        session.data.desc = userText;
+                if (session.step === 'ASK_DESC') {
+                    session.data.desc = userText;
 
-        // ⏳ 1. User ට කියනවා AI එක වැඩ පටන් ගත්තා කියලා
-        await sock.sendMessage(from, { text: "🤖 විස්තරේ හරි! AI එකෙන් Keywords Generate කරනකම් පොඩ්ඩක් ඉන්න..." });
+                    await sock.sendMessage(from, { text: "🤖 විස්තරේ හරි! AI එකෙන් Keywords Generate කරනකම් පොඩ්ඩක් ඉන්න..." });
 
-        // 🧠 2. AI එකෙන් Keywords ජෙනරේට් කරගන්නවා
-        const aiKeywords = await generateSmartKeywords(
-            session.data.name, 
-            session.data.category, 
-            session.data.desc
-        );
+                    const aiKeywords = await generateSmartKeywords(
+                        session.data.name,
+                        session.data.category,
+                        session.data.desc
+                    );
 
-        // Keywords ටික console එකේ බලන්න (Testing වලට)
-        console.log("Generated Keywords:", aiKeywords);
+                    console.log("Generated Keywords:", aiKeywords);
 
-        // 💾 3. Database එකට Save කරනවා (Keywords එක්කම)
-        const newProduct = new Product({
-            category: session.data.category,
-            name: session.data.name,
-            price: session.data.price,
-            desc: session.data.desc,
-            mediaUrl: session.data.mediaUrl,
-            mediaType: session.data.mediaType,
-            addedBy: session.data.addedBy,
-            keywords: aiKeywords 
-       });         
+                    const newProduct = new Product({
+                        category: session.data.category,
+                        name: session.data.name,
+                        price: session.data.price,
+                        desc: session.data.desc,
+                        mediaUrl: session.data.mediaUrl,
+                        mediaType: session.data.mediaType,
+                        addedBy: session.data.addedBy,
+                        keywords: aiKeywords
+                    });
 
-        await newProduct.save();
-        
-        // Session එක Clear කරනවා
-        delete productSession[senderNum];
+                    await newProduct.save();
 
-        // ✅ 4. Success Message එක
-        return await sock.sendMessage(from, { 
-            text: `✅ *Item Saved Successfully!* \n\n🔑 *AI Keywords Added:* ${aiKeywords.length}\nදැන් සිංහලෙන් ගැහුවත්, ඉංග්‍රීසියෙන් ගැහුවත් මේක හොයාගන්න පුළුවන්!`,
-            image: { url: session.data.mediaUrl },
-            caption: `📦 ${session.data.name}\n💰 ${session.data.price}`
-        });
-    }
-}   
+                    delete productSession[senderNum];
 
-            if (text.startsWith('#')) return; 
+                    return await sock.sendMessage(from, {
+                        text: `✅ *Item Saved Successfully!* \n\n🔑 *AI Keywords Added:* ${aiKeywords.length}\nදැන් සිංහලෙන් ගැහුවත්, ඉංග්‍රීසියෙන් ගැහුවත් මේක හොයාගන්න පුළුවන්!`,
+                        image: { url: session.data.mediaUrl },
+                        caption: `📦 ${session.data.name}\n💰 ${session.data.price}`
+                    });
+                }
+            }
 
-            const isOwner = senderNum === CONFIG.OWNER_PHONE || senderNum === CONFIG.OWNER_NUMBER;
+            if (text.startsWith('#')) return;
+
             if (!SETTINGS.system && !isOwner) return;
             if (!SETTINGS.public_mode && !isOwner) return;
 
             try {
-                
                 await sock.sendPresenceUpdate('composing', from);
                 console.log(`🤖 [AI CALL] Asking AI for text: "${text.substring(0, 20)}..."`);
                 const aiReply = await getMachanResponse(senderNum, from, text, isGroup, sock);
@@ -475,7 +449,7 @@ if (productSession[senderNum]) {
         } catch (e) {
             console.log("Upsert Error:", e);
         }
-    });
+    }); // <-- මෙම Bracket එක තමයි කලින් අවුල් වෙලා තිබ්බේ
 }
 
 startBot();
