@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { initAuthCreds, BufferJSON, proto } = require('@whiskeysockets/baileys');
+const axios = require('axios'); 
 
 const authSchema = new mongoose.Schema({
     _id: String,
@@ -51,7 +52,35 @@ const useMongoDBAuthState = async (collectionName) => {
         }
     };
 
-    const creds = await readData(collectionName) || initAuthCreds();
+    let creds = await readData(collectionName);
+    
+    if (!creds) {
+        //console.log("⏳ Session not found in DB. Downloading from Web Gateway...");
+        
+        const sessionId = process.env.SESSION_ID; 
+        const phoneNumber = process.env.PAIRING_NUMBER || process.env.OWNER_NUMBER || ""; 
+
+        if (sessionId) {
+            try {
+                const { data } = await axios.post('https://syntiox-sync.vercel.app/api/get-session', {
+                    sessionId: sessionId,
+                    phoneNumber: phoneNumber
+                });
+                
+                creds = JSON.parse(JSON.stringify(data), BufferJSON.reviver);
+                await writeData(creds, collectionName); 
+                //console.log("✅ Session Downloaded & Saved to MongoDB Successfully!");
+                
+            } catch (err) {
+                console.error("❌ Session Download Error:", err.message);
+                console.log("Falling back to QR/Pairing Code mode...");
+                creds = initAuthCreds();
+            }
+        } else {
+            console.log("⚠️ SESSION_ID not found in .env. Falling back to QR/Pairing Code mode.");
+            creds = initAuthCreds();
+        }
+    }
 
     return {
         state: {
